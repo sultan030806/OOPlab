@@ -1,0 +1,46 @@
+#include <iostream>
+#include <windows.h>
+
+using namespace std;
+
+// Базовый класс с виртуальными и невиртуальными методами
+class Base {
+public:
+    void novirtual_method() {
+        cout << "не виртуальный метод класса Base" << endl;
+    }
+    
+    virtual void virtual_method() {
+        cout << "виртуальный метод класса Base" << endl;
+    }
+    
+    void callsmethod1() {
+        cout << "Вызван: ";
+        novirtual_method();
+    }
+    
+    virtual void callsmethod2() {
+        cout << "Вызван: ";
+        virtual_method();
+    }
+};
+
+int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    
+    cout << "1. Прямой вызов методов базового класса" << endl;
+    Base base;
+    
+    cout << "Вызван ";
+    base.novirtual_method();
+    
+    cout << "Вызван ";
+    base.virtual_method();
+    
+    cout << "Вызовы методов внутри методов:" << endl;
+    base.callsmethod1();
+    base.callsmethod2();
+    
+    return 0;
+}
