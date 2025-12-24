@@ -62,6 +62,58 @@ public:
     void setColor(const string& newColor) { color = newColor; }
 };
 
+class LineWithPointer {
+private:
+    Point* start;
+    Point* end;
+    string name;
+public:
+    LineWithPointer(const Point& s, const Point& e, const string& n)
+        : name(n) {
+        cout << "Конструктор LineWithPointer: " << name << "\n";
+        start = new Point(s);
+        end = new Point(e);
+    }
+
+    ~LineWithPointer() {
+        cout << "Деструктор LineWithPointer: " << name << "\n";
+        delete start;
+        delete end;
+    }
+
+    void print() const {
+        cout << "Линия " << name << ": ";
+        start->print();
+        cout << " до ";
+        end->print();
+    }
+};
+
+class CompositeExample {
+private:
+    Point pointObj;
+    string name;
+public:
+    CompositeExample(const Point& p, const string& n)
+        : pointObj(p), name(n) {
+        cout << "Конструктор CompositeExample: " << name << "\n";
+    }
+
+    ~CompositeExample() {
+        cout << "Деструктор CompositeExample: " << name << "\n";
+    }
+
+    void print() const {
+        cout << "CompositeExample " << name << " содержит: ";
+        pointObj.print();
+    }
+
+    void modifyPoint(int newX, int newY) {
+        pointObj.setX(newX);
+        pointObj.setY(newY);
+    }
+};
+
 void funcByValue(Point p) {
     cout << "funcByValue: ";
     p.print();
@@ -122,6 +174,16 @@ int main() {
     funcByValue(p1);
     funcByPointer(&p2);
     funcByReference(cp1);
+
+    cout << "\n11. Композиция с объектом\n";
+    CompositeExample composite(p1, "comp1");
+    composite.print();
+    composite.modifyPoint(999, 888);
+    composite.print();
+
+    cout << "\n12. Композиция с указателем\n";
+    LineWithPointer line(p1, p2, "линия1");
+    line.print();
 
     return 0;
 }
