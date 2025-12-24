@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <windows.h>
 
 using namespace std;
@@ -8,21 +9,21 @@ public:
     void novirtual_method() {
         cout << "не виртуальный метод класса Base" << endl;
     }
-    
+
     virtual void virtual_method() {
         cout << "виртуальный метод класса Base" << endl;
     }
-    
+
     void callsmethod1() {
         cout << "Вызван: ";
         novirtual_method();
     }
-    
+
     virtual void callsmethod2() {
         cout << "Вызван: ";
         virtual_method();
     }
-    
+
     virtual ~Base() {
         cout << "Вызван деструктор Base" << endl;
     }
@@ -33,42 +34,93 @@ public:
     void novirtual_method() {
         cout << "перекрываемый не виртуальный метод класса Dec" << endl;
     }
-    
+
     void virtual_method() override {
         cout << "переопределяемый виртуальный метод класса Dec" << endl;
+    }
+};
+
+class Base2 {
+public:
+    virtual string classname() {
+        return "Base2";
+    }
+
+    virtual bool isA(const string& classname) {
+        return classname == "Base2";
+    }
+
+    virtual ~Base2() = default;
+};
+
+class Dec2 : public Base2 {
+public:
+    string classname() override {
+        return "Dec2";
+    }
+
+    bool isA(const string& classname) override {
+        return classname == "Dec2" || Base2::isA(classname);
     }
 };
 
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
-    
+
     cout << "1. Прямой вызов объектов" << endl;
     Base base;
     Dec dec;
-    
+
     cout << "Вызван ";
     base.novirtual_method();
-    
+
     cout << "Вызван ";
     dec.novirtual_method();
-    
+
     cout << "\n2. Вызов объектов через указатель" << endl;
     Base* baseptr = &dec;
-    
+
     cout << "Вызван ";
     baseptr->novirtual_method();
-    
+
     cout << "Вызван ";
     baseptr->virtual_method();
-    
+
     cout << "\n3. Вызовы методов внутри методов" << endl;
     dec.callsmethod1();
     dec.callsmethod2();
-    
+
     cout << "\n4. Демонстрация виртуального деструктора" << endl;
     Base* newobject = new Dec();
     delete newobject;
-    
+
+    cout << "\n5. Ручная проверка типа" << endl;
+    vector<Base2*> obj = { new Base2(), new Dec2() };
+
+    for (auto& objects : obj) {
+        cout << "classname: " << objects->classname();
+        cout << ", isA('Dec2'): " << (objects->isA("Dec2") ? "true" : "false") << endl;
+    }
+
+    cout << "\n6. Проблемы с именем класса" << endl;
+    Base2* baseAsDec2 = new Dec2();
+    cout << "Base2* указывает на Dec2: " << baseAsDec2->classname() << endl;
+
+    cout << "\n7. Безопасное приведение с помощью dynamic_cast" << endl;
+    for (auto& objects : obj) {
+        Dec2* decPtr = dynamic_cast<Dec2*>(objects);
+        if (decPtr) {
+            cout << "Объект Dec2, можно безопасно использовать методы Dec2" << endl;
+        }
+        else {
+            cout << "Объект Dec2 не описан" << endl;
+        }
+    }
+
+    for (auto& objects : obj) delete objects;
+    delete baseAsDec2;
+
+
     return 0;
 }
