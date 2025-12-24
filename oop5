@@ -3,7 +3,6 @@
 
 using namespace std;
 
-// Базовый класс с виртуальными и невиртуальными методами
 class Base {
 public:
     void novirtual_method() {
@@ -23,24 +22,53 @@ public:
         cout << "Вызван: ";
         virtual_method();
     }
+    
+    virtual ~Base() {
+        cout << "Вызван деструктор Base" << endl;
+    }
+};
+
+class Dec : public Base {
+public:
+    void novirtual_method() {
+        cout << "перекрываемый не виртуальный метод класса Dec" << endl;
+    }
+    
+    void virtual_method() override {
+        cout << "переопределяемый виртуальный метод класса Dec" << endl;
+    }
 };
 
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
     
-    cout << "1. Прямой вызов методов базового класса" << endl;
+    cout << "1. Прямой вызов объектов" << endl;
     Base base;
+    Dec dec;
     
     cout << "Вызван ";
     base.novirtual_method();
     
     cout << "Вызван ";
-    base.virtual_method();
+    dec.novirtual_method();
     
-    cout << "Вызовы методов внутри методов:" << endl;
-    base.callsmethod1();
-    base.callsmethod2();
+    cout << "\n2. Вызов объектов через указатель" << endl;
+    Base* baseptr = &dec;
+    
+    cout << "Вызван ";
+    baseptr->novirtual_method();
+    
+    cout << "Вызван ";
+    baseptr->virtual_method();
+    
+    cout << "\n3. Вызовы методов внутри методов" << endl;
+    dec.callsmethod1();
+    dec.callsmethod2();
+    
+    cout << "\n4. Демонстрация виртуального деструктора" << endl;
+    Base* newobject = new Dec();
+    delete newobject;
     
     return 0;
 }
