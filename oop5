@@ -64,6 +64,54 @@ public:
     }
 };
 
+class Base3 {
+public:
+    Base3() { cout << "Конструктор Base3 по умолчанию" << endl; }
+    Base3(Base3* obj) { cout << "Конструктор Base3 копирования указателей" << endl; }
+    Base3(Base3& obj) { cout << "Конструктор Base3 копирования ссылок" << endl; }
+    ~Base3() { cout << "Деструктор Base3" << endl; }
+};
+
+class Dec3 : public Base3 {
+public:
+    Dec3() { cout << "Конструктор Dec3 по умолчанию" << endl; }
+    Dec3(Dec3* obj) { cout << "Конструктор Dec3 копирования указателей" << endl; }
+    Dec3(Dec3& obj) { cout << "Конструктор Dec3 копирования ссылок" << endl; }
+    ~Dec3() { cout << "Деструктор Dec3" << endl; }
+};
+
+void func1(Base3 obj) { cout << "func1 по значению" << endl; }
+void func2(Base3* obj) { cout << "func2 по указателю" << endl; }
+void func3(Base3& obj) { cout << "func3 по ссылке" << endl; }
+
+// Возврат объектов из функций
+class Base4 {
+public:
+    Base4() { cout << "Конструктор Base4 по умолчанию" << endl; }
+    Base4(const Base4&) { cout << "Конструктор Base4 копирования" << endl; }
+    ~Base4() { cout << "Деструктор Base4" << endl; }
+};
+
+Base4 func1_ret() {
+    Base4 locobj;
+    return locobj;
+}
+
+Base4* func2_ret() {
+    Base4 locobj;
+    return &locobj;  // Опасное возвращение указателя на локальный объект!
+}
+
+Base4& func3_ret() {
+    Base4 locobj;
+    return locobj;  // Опасное возвращение ссылки на локальный объект!
+}
+
+Base4* func4_ret() {
+    Base4* dynamicobj = new Base4();
+    return dynamicobj;  // Безопасно, но нужно не забыть delete
+}
+
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -121,6 +169,30 @@ int main() {
     for (auto& objects : obj) delete objects;
     delete baseAsDec2;
 
+    cout << "\n8. Передача объекта Base3 в функции" << endl;
+    Base3 base3;
+    func1(base3);
+    func2(&base3);
+    func3(base3);
+
+    cout << "\n9. Передача объекта Dec3 в функции" << endl;
+    Dec3 dec3;
+    func1(dec3);
+    func2(&dec3);
+    func3(dec3);
+
+    cout << "\n10. Возврат объектов из функций" << endl;
+    cout << "func1_ret - локальный объект по значению:" << endl;
+    Base4 b1 = func1_ret();
+
+    cout << "\nfunc2_ret - локальный объект по указателю (опасно!):" << endl;
+    Base4* b2 = func2_ret();
+
+    cout << "\nfunc4_ret - динамический объект по указателю:" << endl;
+    Base4* b4 = func4_ret();
+    delete b4;
+
+    return 0;
 
     return 0;
 }
