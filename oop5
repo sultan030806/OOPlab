@@ -1,198 +1,214 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <memory>
 
 using namespace std;
 
+//перекрываемые методы , виртуальный переопределяемые методы
 class Base {
 public:
-    void novirtual_method() {
-        cout << "не виртуальный метод класса Base" << endl;
-    }
-
-    virtual void virtual_method() {
-        cout << "виртуальный метод класса Base" << endl;
-    }
-
-    void callsmethod1() {
-        cout << "Вызван: ";
-        novirtual_method();
-    }
-
-    virtual void callsmethod2() {
-        cout << "Вызван: ";
-        virtual_method();
-    }
-
-    virtual ~Base() {
-        cout << "Вызван деструктор Base" << endl;
-    }
+	void novirtual_method() {
+		cout << "не виртуальный метод класса Base" << endl;
+	}
+	virtual void virtual_method() {
+		cout << "виртуальный метод класса Base" << endl;
+	}
+	void callsmethod1() {
+		cout << "Вызван: ";
+		novirtual_method();
+	}
+	virtual void callsmethod2() {
+		cout << "Вызван: ";
+		virtual_method();
+	}
+	virtual ~Base() {
+		cout << "Вызван деструктор Base" << endl;
+	}
 };
 
-class Dec : public Base {
+class Dec :public Base {
 public:
-    void novirtual_method() {
-        cout << "перекрываемый не виртуальный метод класса Dec" << endl;
-    }
-
-    void virtual_method() override {
-        cout << "переопределяемый виртуальный метод класса Dec" << endl;
-    }
+	void novirtual_method() {
+		cout << "перекрываемый не виртуальный метод класса Dec" << endl;
+	}
+	void virtual_method() override {
+		cout << "переопределяемый виртуальный метод класса Dec" << endl;
+	}
 };
-
+//Безопасное приведение типов
 class Base2 {
 public:
-    virtual string classname() {
-        return "Base2";
-    }
-
-    virtual bool isA(const string& classname) {
-        return classname == "Base2";
-    }
-
-    virtual ~Base2() = default;
+	virtual string classname() {
+		return "Base2";
+	}
+	virtual bool isA(const string& classname) {
+		return classname == "Base2";
+	}
+	virtual ~Base2() = default;
 };
-
-class Dec2 : public Base2 {
+class Dec2 :public Base2 {
 public:
-    string classname() override {
-        return "Dec2";
-    }
-
-    bool isA(const string& classname) override {
-        return classname == "Dec2" || Base2::isA(classname);
-    }
+	string classname() override {
+		return "Dec2";
+	}
+	bool isA(const string& classname) override {
+		return classname == "Dec2" || Base2::isA(classname);
+	}
 };
-
+// Передача объектов в функции
 class Base3 {
 public:
-    Base3() { cout << "Конструктор Base3 по умолчанию" << endl; }
-    Base3(Base3* obj) { cout << "Конструктор Base3 копирования указателей" << endl; }
-    Base3(Base3& obj) { cout << "Конструктор Base3 копирования ссылок" << endl; }
-    ~Base3() { cout << "Деструктор Base3" << endl; }
+	Base3() { cout << "Конструктор Base3 по умолчанию" << endl; }
+	Base3(Base3* obj) { cout << "Конструктор Base3 копирования указателей " << endl; }
+	Base3(Base3& obj) { cout << "Конструктор Base3 копирования ссылок" << endl; }
+	~Base3() { cout << "Деструктор Base3" << endl; }
 };
-
-class Dec3 : public Base3 {
+class Dec3 :public Base3 {
 public:
-    Dec3() { cout << "Конструктор Dec3 по умолчанию" << endl; }
-    Dec3(Dec3* obj) { cout << "Конструктор Dec3 копирования указателей" << endl; }
-    Dec3(Dec3& obj) { cout << "Конструктор Dec3 копирования ссылок" << endl; }
-    ~Dec3() { cout << "Деструктор Dec3" << endl; }
+	Dec3() { cout << "Конструктор Dec3 по умолчанию" << endl; }
+	Dec3(Dec3* obj) { cout << "Конструктор Dec3 копирования указателей"; }
+	Dec3(Dec3& obj) { cout << "Конструктор Dec3 копирования ссылок" << endl; }
+	~Dec3() { cout << "Деструктор Dec3" << endl; }
 };
-
 void func1(Base3 obj) { cout << "func1 по значению" << endl; }
 void func2(Base3* obj) { cout << "func2 по указателю" << endl; }
 void func3(Base3& obj) { cout << "func3 по ссылке" << endl; }
-
-// Возврат объектов из функций
+//Возврат объектов из функций
 class Base4 {
 public:
-    Base4() { cout << "Конструктор Base4 по умолчанию" << endl; }
-    Base4(const Base4&) { cout << "Конструктор Base4 копирования" << endl; }
-    ~Base4() { cout << "Деструктор Base4" << endl; }
+	Base4() { cout << "Конструктор Base4 по умолчанию" << endl; }
+	Base4(const Base4&) { cout << "Конструктор Base4 копирования" << endl; }
+	~Base4() { cout << "Деструктор Base4" << endl; }
 };
-
-Base4 func1_ret() {
-    Base4 locobj;
-    return locobj;
+Base4 func1() {
+	Base4 locobj;
+	return locobj;
+}
+Base4* func2() {
+	Base4 locobj;
+	return &locobj;
+}
+Base4& func3() {
+	Base4 locobj;
+	return locobj;
+}
+Base4 func4() {
+	Base4* dynamicobj = new Base4();
+	return *dynamicobj;
+}
+Base4* func5() {
+	Base4* dynamicobj = new Base4();
+	return dynamicobj;
+}
+Base4& func6() {
+	Base4* dynamicobj = new Base4();
+	return *dynamicobj;
+}
+//Умные указатели 
+class toworkptr {
+private:
+	int item;
+public:
+	toworkptr(int item) : item(item) { cout << "toworkptr: " << item << " создан" << endl; }
+	~toworkptr() { cout << "toworkpt: " << item << " уничтожен" << endl; }
+	void use() { cout << "Использование ресурса " << item << endl; }
+};
+void useUnique(unique_ptr<toworkptr> res) {
+	if (res) res->use();
+}
+void useShared(shared_ptr<toworkptr> res) {
+	if (res) res->use();
 }
 
-Base4* func2_ret() {
-    Base4 locobj;
-    return &locobj;  // Опасное возвращение указателя на локальный объект!
-}
-
-Base4& func3_ret() {
-    Base4 locobj;
-    return locobj;  // Опасное возвращение ссылки на локальный объект!
-}
-
-Base4* func4_ret() {
-    Base4* dynamicobj = new Base4();
-    return dynamicobj;  // Безопасно, но нужно не забыть delete
-}
 
 int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-
-    cout << "1. Прямой вызов объектов" << endl;
-    Base base;
-    Dec dec;
-
-    cout << "Вызван ";
-    base.novirtual_method();
-
-    cout << "Вызван ";
-    dec.novirtual_method();
-
-    cout << "\n2. Вызов объектов через указатель" << endl;
-    Base* baseptr = &dec;
-
-    cout << "Вызван ";
-    baseptr->novirtual_method();
-
-    cout << "Вызван ";
-    baseptr->virtual_method();
-
-    cout << "\n3. Вызовы методов внутри методов" << endl;
-    dec.callsmethod1();
-    dec.callsmethod2();
-
-    cout << "\n4. Демонстрация виртуального деструктора" << endl;
-    Base* newobject = new Dec();
-    delete newobject;
-
-    cout << "\n5. Ручная проверка типа" << endl;
-    vector<Base2*> obj = { new Base2(), new Dec2() };
-
-    for (auto& objects : obj) {
-        cout << "classname: " << objects->classname();
-        cout << ", isA('Dec2'): " << (objects->isA("Dec2") ? "true" : "false") << endl;
-    }
-
-    cout << "\n6. Проблемы с именем класса" << endl;
-    Base2* baseAsDec2 = new Dec2();
-    cout << "Base2* указывает на Dec2: " << baseAsDec2->classname() << endl;
-
-    cout << "\n7. Безопасное приведение с помощью dynamic_cast" << endl;
-    for (auto& objects : obj) {
-        Dec2* decPtr = dynamic_cast<Dec2*>(objects);
-        if (decPtr) {
-            cout << "Объект Dec2, можно безопасно использовать методы Dec2" << endl;
-        }
-        else {
-            cout << "Объект Dec2 не описан" << endl;
-        }
-    }
-
-    for (auto& objects : obj) delete objects;
-    delete baseAsDec2;
-
-    cout << "\n8. Передача объекта Base3 в функции" << endl;
-    Base3 base3;
-    func1(base3);
-    func2(&base3);
-    func3(base3);
-
-    cout << "\n9. Передача объекта Dec3 в функции" << endl;
-    Dec3 dec3;
-    func1(dec3);
-    func2(&dec3);
-    func3(dec3);
-
-    cout << "\n10. Возврат объектов из функций" << endl;
-    cout << "func1_ret - локальный объект по значению:" << endl;
-    Base4 b1 = func1_ret();
-
-    cout << "\nfunc2_ret - локальный объект по указателю (опасно!):" << endl;
-    Base4* b2 = func2_ret();
-
-    cout << "\nfunc4_ret - динамический объект по указателю:" << endl;
-    Base4* b4 = func4_ret();
-    delete b4;
-
-    return 0;
-
-    return 0;
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	cout << "1.Прямой вызов объектов" << endl;
+	Base base;
+	Dec dec;
+	cout << "Вызван ";
+	base.novirtual_method();
+	cout << "Вызван ";
+	dec.novirtual_method();
+	cout << "2.Вызов объектов через указатель" << endl;
+	Base* baseptr = &dec;
+	cout << "Вызван ";
+	baseptr->novirtual_method();
+	cout << "Вызван";
+	baseptr->virtual_method();
+	cout << "Вызовы методов внутри методов" << endl;
+	Dec dec2;
+	dec2.callsmethod1();
+	dec2.callsmethod2();
+	cout << "Демострация виртуального деструктора" << endl;
+	Base* newobject = new Dec();
+	delete newobject;
+	cout << "3. Ручная проверка типа" << endl;
+	vector<Base2*> obj = { new Base2(),new Dec2() };
+	for (auto& objects : obj) {
+		cout << "classname" << objects->classname();
+		cout << ", isA('Dec2')" << (objects->isA("Dec2") ? "true" : "false") << endl;
+	}
+	cout << "4. Проблемы с именем класса" << endl;
+	Base2* baseAsDec2 = new Dec2();
+	cout << "Base2* указывает на Dec2 " << baseAsDec2->classname() << endl;
+	cout << "5. Безопасное приведение с помощью dynamic_cast" << endl;
+	for (auto& objects : obj) {
+		Dec2* decPtr = dynamic_cast<Dec2*>(objects);
+		if (decPtr) cout << "Объект  Dec2, можно безопасно использовать методы Dec2" << endl;
+		else cout << "Объект Dec2 не описан " << endl;
+	}
+	for (auto& objects : obj) delete objects;
+	cout << "6.Передача объекта Base3" << endl;
+	Base3 base3;
+	func1(base3);
+	func2(&base3);
+	func3(base3);
+	cout << "7.Перелача объекта Dec3" << endl;
+	Dec3 dec3;
+	func1(dec3);
+	func2(&dec3);
+	func3(dec3);
+	cout << "8.Возврат объектов из функций" << endl;
+	cout << "func1 локальный объект по значению" << endl;
+	Base4 b1 = func1();
+	cout << "func2 локальный объект по указателю" << endl;
+	Base4* b2 = func2();
+	cout << "func3 локальный объект по ссылке" << endl;
+	Base4& b3 = func3();
+	cout << "func4 динамический объект по значению" << endl;
+	Base4 b4 = func4();
+	cout << "func5 динамический объект по указателю" << endl;
+	Base4* b5 = func5();
+	delete b5;
+	cout << "func6 динамический объект по ссылке" << endl;
+	Base4& b6 = func6();
+	cout << "9.Умные указатели" << endl;
+	cout << "unique_ptr" << endl;
+	{
+		unique_ptr<toworkptr> t1 = make_unique<toworkptr>(1);
+		t1->use();
+		unique_ptr<toworkptr> t2 = move(t1);
+		if (!t1) cout << "t1 теперь пуст" << endl;
+	}
+	cout << "unique_ptr в функции" << endl;
+	auto t3 = make_unique < toworkptr>(3);
+	useUnique(move(t3));
+	if (!t3) cout << "t3 теперь пуст после перемещения" << endl;
+	cout << "shared_ptr" << endl;
+	{
+		shared_ptr<toworkptr> j1 = make_shared<toworkptr>(10);
+		{
+			shared_ptr<toworkptr> j2 = j1;
+			cout << "Используется счётчик: " << j1.use_count() << endl;
+		}
+		cout << "Используется счётчик: " << j1.use_count() << endl;
+	}
+	cout << "shared_ptr в функции" << endl;
+	auto j4 = make_shared<toworkptr>(40);
+	useShared(j4);
+	cout << "Используется счётчик после функции: " << j4.use_count() << endl;
+	return 0;
 }
