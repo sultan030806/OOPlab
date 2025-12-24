@@ -17,7 +17,7 @@ public:
     Point(const Point& other) : x(other.x), y(other.y) {
         cout << "Конструктор копирования Point\n";
     }
-    ~Point() {
+    virtual ~Point() {  // Добавили virtual
         cout << "Деструктор Point (" << x << "," << y << ")\n";
     }
 
@@ -35,6 +35,31 @@ public:
     void print() const {
         cout << "Точка(" << x << ", " << y << ")\n";
     }
+};
+
+class ColoredPoint : public Point {
+private:
+    string color;
+public:
+    ColoredPoint() : Point(), color("чёрный") {
+        cout << "Конструктор ColoredPoint по умолчанию\n";
+    }
+    ColoredPoint(int x, int y, const string& color)
+        : Point(x, y), color(color) {
+        cout << "Конструктор ColoredPoint с параметрами\n";
+    }
+
+    ~ColoredPoint() {
+        cout << "Деструктор ColoredPoint (" << color << ")\n";
+    }
+
+    void print() const {
+        cout << "Цветная точка(" << getX() << "," << getY()
+            << "," << color << ")\n";
+    }
+
+    string getColor() const { return color; }
+    void setColor(const string& newColor) { color = newColor; }
 };
 
 int main() {
@@ -62,5 +87,20 @@ int main() {
     delete p3;
 
     cout << "\n7. Уничтожение статических объектов\n";
+    
+    cout << "\n8. Работа с наследованием\n";
+    ColoredPoint cp1;
+    ColoredPoint cp2(5, 15, "красный");
+    ColoredPoint* cp3 = new ColoredPoint(25, 35, "синий");
+
+    cp1.print();
+    cp2.print();
+    cp3->print();
+
+    cout << "\n9. Перемещение цветной точки\n";
+    cp1.move(3, 3);
+
+    delete cp3;
+
     return 0;
 }
