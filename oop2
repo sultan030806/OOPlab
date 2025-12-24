@@ -14,22 +14,24 @@ public:
     Point(int x, int y) : x(x), y(y) {
         cout << "Конструктор Point с параметрами (" << x << "," << y << ")\n";
     }
-    
+    Point(const Point& other) : x(other.x), y(other.y) {
+        cout << "Конструктор копирования Point\n";
+    }
     ~Point() {
         cout << "Деструктор Point (" << x << "," << y << ")\n";
     }
-    
+
     int getX() const { return x; }
     int getY() const { return y; }
     void setX(int newX) { x = newX; }
     void setY(int newY) { y = newY; }
-    
+
     void move(int dx, int dy) {
         x += dx;
         y += dy;
         cout << "Точка перемещена в (" << x << "," << y << ")\n";
     }
-    
+
     void print() const {
         cout << "Точка(" << x << ", " << y << ")\n";
     }
@@ -37,17 +39,28 @@ public:
 
 int main() {
     setlocale(LC_ALL, "Ru");
-    
+
     cout << "1. Создание статических объектов\n";
     Point p1;
     Point p2(10, 20);
-    
-    cout << "\n2. Вызов методов\n";
+
+    cout << "\n2. Создание динамических объектов\n";
+    Point* p3 = new Point(30, 40);
+
+    cout << "\n3. Конструкторы копирования\n";
+    Point p4 = p2;
+
+    cout << "\n4. Вызов методов\n";
     p1.print();
     p2.print();
-    
-    cout << "\n3. Перемещение точек\n";
+    p3->print();
+
+    cout << "\n5. Перемещение точек\n";
     p1.move(5, 5);
-    
+
+    cout << "\n6. Уничтожение динамических объектов\n";
+    delete p3;
+
+    cout << "\n7. Уничтожение статических объектов\n";
     return 0;
 }
