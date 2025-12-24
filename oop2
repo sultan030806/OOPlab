@@ -5,185 +5,191 @@ using namespace std;
 
 class Point {
 private:
-    int x;
-    int y;
+	int x;
+	int y;
 public:
-    Point() : x(0), y(0) {
-        cout << "Конструктор Point по умолчанию\n";
-    }
-    Point(int x, int y) : x(x), y(y) {
-        cout << "Конструктор Point с параметрами (" << x << "," << y << ")\n";
-    }
-    Point(const Point& other) : x(other.x), y(other.y) {
-        cout << "Конструктор копирования Point\n";
-    }
-    virtual ~Point() {  // Добавили virtual
-        cout << "Деструктор Point (" << x << "," << y << ")\n";
-    }
+	Point() : x(0), y(0) {
+		cout << "Констуктор Point по умолчанию\n";
+	}
+	Point(int x, int y) : x(x), y(y) {
+		cout << "Конструктор Point с параметрами (" << x << "," << y << ")\n";
+	}
+	Point(const Point& other) : x(other.x), y(other.y) {
+		cout << "Конструктор копирования Point\n";
+	}
 
-    int getX() const { return x; }
-    int getY() const { return y; }
-    void setX(int newX) { x = newX; }
-    void setY(int newY) { y = newY; }
+	virtual ~Point() {
+		cout << "Деструктор Point (" << x << "," << y << ")\n";
+	}
 
-    void move(int dx, int dy) {
-        x += dx;
-        y += dy;
-        cout << "Точка перемещена в (" << x << "," << y << ")\n";
-    }
+	int getX() const { return x; }
+	int getY() const { return y; }
+	void setX(int newX) { x = newX; }
+	void setY(int newY) { y = newY; }
 
-    void print() const {
-        cout << "Точка(" << x << ", " << y << ")\n";
-    }
+	void move(int dx, int dy) {
+		x += dx;
+		y += dy;
+		cout << "Точка перемещена в (" << x << "," << y << ")\n";
+	}
+
+	virtual void print() const {
+		cout << "Точка(" << x << ", " << y << ")\n";
+	}
 };
 
 class ColoredPoint : public Point {
 private:
-    string color;
+	string color;
 public:
-    ColoredPoint() : Point(), color("чёрный") {
-        cout << "Конструктор ColoredPoint по умолчанию\n";
-    }
-    ColoredPoint(int x, int y, const string& color)
-        : Point(x, y), color(color) {
-        cout << "Конструктор ColoredPoint с параметрами\n";
-    }
+	ColoredPoint() : Point(), color("чёрный") {
+		cout << "Конструктор ColoredPoint по умолчанию\n";
+	}
+	ColoredPoint(int x, int y, const string& color) : Point(x, y), color(color) {
+		cout << "Конструктор ColoredPoint с параметрами (" << x << "," << y << "," << color << ")\n";
+	}
+	ColoredPoint(const ColoredPoint& other) : Point(other), color(other.color) {
+		cout << "Конструктор копирования ColoredPoint\n";
+	}
 
-    ~ColoredPoint() {
-        cout << "Деструктор ColoredPoint (" << color << ")\n";
-    }
+	~ColoredPoint() {
+		cout << "Деструктор ColoredPoint (" << color << ")\n";
+	}
 
-    void print() const {
-        cout << "Цветная точка(" << getX() << "," << getY()
-            << "," << color << ")\n";
-    }
-
-    string getColor() const { return color; }
-    void setColor(const string& newColor) { color = newColor; }
+	void print() const {
+		cout << "Цветная точка(" << getX() << "," << getY() << "," << color << ")\n";
+	}
+	string getColor() const { return color; }
+	void setColor(const string& newColor) { color = newColor; }
 };
 
 class LineWithPointer {
 private:
-    Point* start;
-    Point* end;
-    string name;
+	Point* start;
+	Point* end;
+	string name;
 public:
-    LineWithPointer(const Point& s, const Point& e, const string& n)
-        : name(n) {
-        cout << "Конструктор LineWithPointer: " << name << "\n";
-        start = new Point(s);
-        end = new Point(e);
-    }
+	LineWithPointer(const Point& s, const Point& e, const string& n) : name(n) {
+		cout << "Конструктор LineWithPointer: " << name << "\n";
+		start = new Point(s);
+		end = new Point(e);
+	}
+	~LineWithPointer() {
+		cout << "Деструктор LineWithPointer: " << name << "\n";
+		delete start;
+		delete end;
+	}
 
-    ~LineWithPointer() {
-        cout << "Деструктор LineWithPointer: " << name << "\n";
-        delete start;
-        delete end;
-    }
-
-    void print() const {
-        cout << "Линия " << name << ": ";
-        start->print();
-        cout << " до ";
-        end->print();
-    }
+	void print() const {
+		cout << "Линия " << name << ": ";
+		start->print();
+		cout << " до ";
+		end->print();
+	}
 };
-
 class CompositeExample {
 private:
-    Point pointObj;
-    string name;
+	Point pointObj;
+	string name;
 public:
-    CompositeExample(const Point& p, const string& n)
-        : pointObj(p), name(n) {
-        cout << "Конструктор CompositeExample: " << name << "\n";
-    }
+	CompositeExample(const Point& p, const string& n) :pointObj(p), name(n) {
+		cout << "Конструктор CompositeExample: " << name << "\n";
+	}
 
-    ~CompositeExample() {
-        cout << "Деструктор CompositeExample: " << name << "\n";
-    }
+	~CompositeExample() {
+		cout << "Деструктор CompositeExample: " << name << "\n";
+	}
 
-    void print() const {
-        cout << "CompositeExample " << name << " содержит: ";
-        pointObj.print();
-    }
+	void print() const {
+		cout << "CompositeExample" << name << "содержит: ";
+		pointObj.print();
+	}
 
-    void modifyPoint(int newX, int newY) {
-        pointObj.setX(newX);
-        pointObj.setY(newY);
-    }
+	void modifyPoint(int newX, int newY) {
+		pointObj.setX(newX);
+		pointObj.setY(newY);
+	}
 };
 
 void funcByValue(Point p) {
-    cout << "funcByValue: ";
-    p.print();
+	cout << "funcByValue: ";
+	p.print();
 }
-
 void funcByPointer(Point* p) {
-    cout << "funcByPointer: ";
-    p->print();
+	cout << "funcByPointer: ";
+	p->print();
 }
-
 void funcByReference(Point& p) {
-    cout << "funcByReference: ";
-    p.print();
+	cout << "funcByReference: ";
+	p.print();
 }
-
 
 int main() {
-    setlocale(LC_ALL, "Ru");
-
-    cout << "1. Создание статических объектов\n";
-    Point p1;
-    Point p2(10, 20);
-
-    cout << "\n2. Создание динамических объектов\n";
-    Point* p3 = new Point(30, 40);
-
-    cout << "\n3. Конструкторы копирования\n";
-    Point p4 = p2;
-
-    cout << "\n4. Вызов методов\n";
-    p1.print();
-    p2.print();
-    p3->print();
-
-    cout << "\n5. Перемещение точек\n";
-    p1.move(5, 5);
-
-    cout << "\n6. Уничтожение динамических объектов\n";
-    delete p3;
-
-    cout << "\n7. Уничтожение статических объектов\n";
-    
-    cout << "\n8. Работа с наследованием\n";
-    ColoredPoint cp1;
-    ColoredPoint cp2(5, 15, "красный");
-    ColoredPoint* cp3 = new ColoredPoint(25, 35, "синий");
-
-    cp1.print();
-    cp2.print();
-    cp3->print();
-
-    cout << "\n9. Перемещение цветной точки\n";
-    cp1.move(3, 3);
-
-    delete cp3;
-
-    cout << "\n10. Передача объектов в функции\n";
-    funcByValue(p1);
-    funcByPointer(&p2);
-    funcByReference(cp1);
-
-    cout << "\n11. Композиция с объектом\n";
-    CompositeExample composite(p1, "comp1");
-    composite.print();
-    composite.modifyPoint(999, 888);
-    composite.print();
-
-    cout << "\n12. Композиция с указателем\n";
-    LineWithPointer line(p1, p2, "линия1");
-    line.print();
-
-    return 0;
+	setlocale(LC_ALL, "Ru");
+	cout << "1. Создание статических объектов\n";
+	Point p1;
+	Point p2(10, 20);
+	ColoredPoint cp1;
+	ColoredPoint cp2(5, 15, "красный");
+	cout << "\n2. Создание динамических объектов\n";
+	Point* p3 = new Point(30, 40);
+	ColoredPoint* cp3 = new ColoredPoint(25, 35, "синий");
+	cout << "\n3. Конструкторы копирования\n";
+	Point p4 = p2;
+	ColoredPoint cp4 = cp2;
+	cout << "\n4. Вызов методов\n";
+	p1.print();
+	p2.print();
+	cp1.print();
+	cp2.print();
+	p3->print();
+	cp3->print();
+	cout << "\n5. Перемещение точек\n";
+	p1.move(5, 5);
+	cp1.move(3, 3);
+	cout << "\n6. Передача объектов в функции\n";
+	funcByValue(p1);
+	funcByPointer(&p2);
+	funcByReference(cp1);
+	cout << "\n7. Композиция с объектом\n";
+	CompositeExample composite(p1, " comp1 ");
+	composite.print();
+	cout << "Меняем точку внутри composite:\n";
+	composite.modifyPoint(999, 888);
+	composite.print();
+	cout << "\n8. Композиция с указателем\n";
+	LineWithPointer line2(p1, p2, "линия2");
+	line2.print();
+	cout << "\n9. Присваивание объектов\n";
+	Point p5(100, 200);
+	Point p6 = p5; // копирование
+	cout << "После копирования:\n";
+	p5.print();
+	p6.print();
+	p5.setX(999);
+	cout << "После изменения p5:\n";
+	p5.print();
+	p6.print();
+	cout << "\n10. Присваивание указателей\n";
+	Point* p7 = new Point(300, 400);
+	Point* p8 = p7; // оба указывают на один объект
+	cout << "После присваивания указателей:\n";
+	p7->print();
+	p8->print();
+	p7->setX(777);
+	cout << "После изменения через p7:\n";
+	p7->print();
+	p8->print();
+	cout << "\n11. Полиморфное поведение (без virtual)\n";
+	Point* basePtr = new ColoredPoint(50, 60, "зеленый");
+	cout << "Вызов print через указатель на базовый класс:\n";
+	basePtr->print(); // Вызовется метод Point, а не ColoredPoint!
+	cout << "\n12. Уничтожение динамических объектов\n";
+	delete p3;
+	delete cp3;
+	delete p7;
+	// p8 не удаляем - он указывает на тот же объект что и p7
+	delete basePtr;
+	cout << "\n13. Уничтожение статических объектов (автоматически при выходе из scope)\n";
+	return 0;
 }
