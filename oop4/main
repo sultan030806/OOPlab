@@ -1,0 +1,9 @@
+#include "shapeditor.h"
+#include <QApplication>
+
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    ShapeEditor window;
+    window.show();
+    return app.exec();
+}
