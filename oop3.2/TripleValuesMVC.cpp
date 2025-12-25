@@ -80,6 +80,9 @@ MainWindow::MainWindow(QWidget* parent)
 {
     setWindowTitle("Triple Values - Stage 1");
     setFixedSize(400, 200);
+
+    setWindowTitle("Triple Values - Stage 2");
+    setFixedSize(400, 300);
     
     setupUI();
     
