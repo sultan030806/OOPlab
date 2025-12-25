@@ -8,7 +8,7 @@ void ShapesContainer::add(Shape* shape) {
 void ShapesContainer::remove(Shape* shape) {
     auto it = std::find(shapes.begin(), shapes.end(), shape);
     if (it != shapes.end()) {
-        delete* it;
+        delete* it; // Освобождаем память
         shapes.erase(it);
     }
 }
@@ -25,12 +25,14 @@ void ShapesContainer::clear_selected() {
         }
     }
 
+    // Освобождаем память удаляемых фигур
     for (Shape* shape : shapes) {
         if (shape->get_selected()) {
             delete shape;
         }
     }
 
+    // Удаляем указатели на выделенные фигуры
     shapes.erase(std::remove_if(shapes.begin(), shapes.end(),
         [](Shape* shape) { return shape->get_selected(); }),
         shapes.end());
@@ -105,11 +107,41 @@ bool Shape::resize(int dw, int dh, int canvas_width, int canvas_height) {
     }
 }
 
+void Shape::adjust_to_bounds(int canvas_width, int canvas_height) {
+    int old_x = x, old_y = y;
+    bool adjusted = false;
+
+    if (x + width > canvas_width) {
+        x = std::max(0, canvas_width - width);
+        adjusted = true;
+    }
+    if (y + height > canvas_height) {
+        y = std::max(0, canvas_height - height);
+        adjusted = true;
+    }
+    if (x < 0) {
+        x = 0;
+        adjusted = true;
+    }
+    if (y < 0) {
+        y = 0;
+        adjusted = true;
+    }
+
+    if (adjusted) {
+        std::cout << "Shape " << Shape::get_shape_type_name(this).toStdString()
+            << " adjusted when canvas resized: from (" << old_x << ", " << old_y
+            << ") to (" << x << ", " << y << ")" << std::endl;
+    }
+}
+
 QString Shape::get_shape_type_name(const Shape* shape) {
     if (dynamic_cast<const Circle*>(shape)) return "Circle";
     if (dynamic_cast<const Rectangle*>(shape)) return "Rectangle";
     if (dynamic_cast<const Square*>(shape)) return "Square";
+    if (dynamic_cast<const Ellipse*>(shape)) return "Ellipse";
     if (dynamic_cast<const Triangle*>(shape)) return "Triangle";
+    if (dynamic_cast<const Line*>(shape)) return "Line";
     return "Unknown";
 }
 
@@ -190,6 +222,34 @@ bool Square::contains(const QPoint& point) const {
         point.y() >= get_y() && point.y() <= get_y() + get_height());
 }
 
+// Ellipse implementation
+Ellipse::Ellipse(int x, int y) : Shape(x, y) {
+    set_width(70);
+    set_height(40);
+    selection_color = QColor(128, 128, 0); // Olive
+}
+
+void Ellipse::draw(QPainter& painter) {
+    QPen pen(color, line_width);
+    painter.setPen(pen);
+    painter.drawEllipse(get_x(), get_y(), get_width(), get_height());
+
+    if (is_selected) {
+        QPen selection_pen(selection_color, selection_line_width);
+        painter.setPen(selection_pen);
+        painter.setBrush(QBrush(QColor(0, 0, 0, 0)));
+        painter.drawEllipse(get_x() - 3, get_y() - 3, get_width() + 6, get_height() + 6);
+    }
+}
+
+bool Ellipse::contains(const QPoint& point) const {
+    int center_x = get_x() + get_width() / 2;
+    int center_y = get_y() + get_height() / 2;
+    double dx = (point.x() - center_x) / (get_width() / 2.0);
+    double dy = (point.y() - center_y) / (get_height() / 2.0);
+    return (dx * dx + dy * dy) <= 1.0;
+}
+
 // Triangle implementation
 Triangle::Triangle(int x, int y) : Shape(x, y) {
     set_width(60);
@@ -218,6 +278,32 @@ void Triangle::draw(QPainter& painter) {
 bool Triangle::contains(const QPoint& point) const {
     return (point.x() >= get_x() && point.x() <= get_x() + get_width() &&
         point.y() >= get_y() && point.y() <= get_y() + get_height());
+}
+
+// Line implementation
+Line::Line(int x, int y) : Shape(x, y) {
+    set_width(80);
+    set_height(2);
+    selection_color = QColor(128, 0, 128); // Purple
+    line_width = 3;
+    selection_line_width = 4;
+}
+
+void Line::draw(QPainter& painter) {
+    QPen pen(color, line_width);
+    painter.setPen(pen);
+    painter.drawLine(get_x(), get_y(), get_x() + get_width(), get_y() + get_height());
+
+    if (is_selected) {
+        QPen selection_pen(selection_color, selection_line_width);
+        painter.setPen(selection_pen);
+        painter.drawRect(get_x() - 3, get_y() - 3, get_width() + 6, get_height() + 6);
+    }
+}
+
+bool Line::contains(const QPoint& point) const {
+    return (point.x() >= get_x() - 5 && point.x() <= get_x() + get_width() + 5 &&
+        point.y() >= get_y() - 5 && point.y() <= get_y() + get_height() + 5);
 }
 
 // CanvasWidget implementation
@@ -309,8 +395,14 @@ void CanvasWidget::mousePressEvent(QMouseEvent* event) {
                 else if (current_shape_type == "square") {
                     new_shape = new Square(x, y);
                 }
+                else if (current_shape_type == "ellipse") {
+                    new_shape = new Ellipse(x, y);
+                }
                 else if (current_shape_type == "triangle") {
                     new_shape = new Triangle(x, y);
+                }
+                else if (current_shape_type == "line") {
+                    new_shape = new Line(x, y);
                 }
 
                 if (new_shape) {
@@ -369,8 +461,41 @@ void CanvasWidget::keyPressEvent(QKeyEvent* event) {
     }
 }
 
+void CanvasWidget::resizeEvent(QResizeEvent* event) {
+    QSize old_size = event->oldSize();
+    QSize new_size = event->size();
+    std::cout << "Canvas changed from " << old_size.width() << "x" << old_size.height()
+        << " to " << new_size.width() << "x" << new_size.height() << std::endl;
+
+    QWidget::resizeEvent(event);
+
+    for (Shape* shape : shapes_container.get_all()) {
+        shape->adjust_to_bounds(width(), height());
+    }
+    update();
+}
+
 void CanvasWidget::set_current_shape_type(const QString& shape_type) {
     current_shape_type = shape_type;
+}
+
+void CanvasWidget::change_selected_shapes_color(const QColor& color) {
+    std::vector<QString> changed_types;
+    for (Shape* shape : shapes_container.get_all()) {
+        if (shape->get_selected()) {
+            shape->set_color(color);
+            changed_types.push_back(Shape::get_shape_type_name(shape));
+        }
+    }
+
+    if (!changed_types.empty()) {
+        std::cout << "Changed color for shapes: ";
+        for (size_t i = 0; i < changed_types.size(); ++i) {
+            std::cout << changed_types[i].toStdString();
+            if (i < changed_types.size() - 1) std::cout << ", ";
+        }
+        std::cout << " to " << color.name().toStdString() << std::endl;
+    }
 }
 
 // ShapeEditor implementation
@@ -394,17 +519,29 @@ void ShapeEditor::create_menu() {
     QAction* rectangle_action = new QAction("Rectangle", this);
     QAction* circle_action = new QAction("Circle", this);
     QAction* square_action = new QAction("Square", this);
+    QAction* ellipse_action = new QAction("Ellipse", this);
     QAction* triangle_action = new QAction("Triangle", this);
+    QAction* line_action = new QAction("Line", this);
 
     shapes_menu->addAction(rectangle_action);
     shapes_menu->addAction(circle_action);
     shapes_menu->addAction(square_action);
+    shapes_menu->addAction(ellipse_action);
     shapes_menu->addAction(triangle_action);
+    shapes_menu->addAction(line_action);
 
     connect(rectangle_action, &QAction::triggered, this, [this]() { set_shape_type("rectangle"); });
     connect(circle_action, &QAction::triggered, this, [this]() { set_shape_type("circle"); });
     connect(square_action, &QAction::triggered, this, [this]() { set_shape_type("square"); });
+    connect(ellipse_action, &QAction::triggered, this, [this]() { set_shape_type("ellipse"); });
     connect(triangle_action, &QAction::triggered, this, [this]() { set_shape_type("triangle"); });
+    connect(line_action, &QAction::triggered, this, [this]() { set_shape_type("line"); });
+
+    // Color menu
+    QMenu* color_menu = menu_bar->addMenu("Color");
+    QAction* change_color_action = new QAction("Change selected color", this);
+    connect(change_color_action, &QAction::triggered, this, &ShapeEditor::change_color);
+    color_menu->addAction(change_color_action);
 }
 
 void ShapeEditor::create_toolbar() {
@@ -415,7 +552,9 @@ void ShapeEditor::create_toolbar() {
         {"Rectangle", "rectangle"},
         {"Circle", "circle"},
         {"Square", "square"},
-        {"Triangle", "triangle"}
+        {"Ellipse", "ellipse"},
+        {"Triangle", "triangle"},
+        {"Line", "line"}
     };
 
     for (const auto& [text, shape_type] : shape_actions) {
@@ -428,4 +567,12 @@ void ShapeEditor::create_toolbar() {
 void ShapeEditor::set_shape_type(const QString& shape_type) {
     canvas->set_current_shape_type(shape_type);
     std::cout << "Selected shape: " << shape_type.toStdString() << std::endl;
+}
+
+void ShapeEditor::change_color() {
+    QColor color = QColorDialog::getColor();
+    if (color.isValid()) {
+        canvas->change_selected_shapes_color(color);
+        canvas->update();
+    }
 }
