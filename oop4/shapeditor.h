@@ -12,6 +12,8 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QAction>
+#include <QColorDialog>
+#include <QString>
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -50,12 +52,15 @@ public:
     virtual bool contains(const QPoint& point) const = 0;
     bool move(int dx, int dy, int canvas_width, int canvas_height);
     bool resize(int dw, int dh, int canvas_width, int canvas_height);
+    void adjust_to_bounds(int canvas_width, int canvas_height);
 
     // Getters and setters
     void set_color(const QColor& color) { this->color = color; }
     void set_selected(bool selected) { is_selected = selected; }
     bool get_selected() const { return is_selected; }
     QColor get_color() const { return color; }
+
+    // New getters for width and height
     int get_width() const { return width; }
     int get_height() const { return height; }
     int get_x() const { return x; }
@@ -92,9 +97,23 @@ public:
     bool contains(const QPoint& point) const override;
 };
 
+class Ellipse : public Shape {
+public:
+    Ellipse(int x, int y);
+    void draw(QPainter& painter) override;
+    bool contains(const QPoint& point) const override;
+};
+
 class Triangle : public Shape {
 public:
     Triangle(int x, int y);
+    void draw(QPainter& painter) override;
+    bool contains(const QPoint& point) const override;
+};
+
+class Line : public Shape {
+public:
+    Line(int x, int y);
     void draw(QPainter& painter) override;
     bool contains(const QPoint& point) const override;
 };
@@ -111,10 +130,13 @@ protected:
     void paintEvent(QPaintEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 public:
     CanvasWidget(QWidget* parent = nullptr);
     void set_current_shape_type(const QString& shape_type);
+    void change_selected_shapes_color(const QColor& color);
+
     ShapesContainer& get_shapes_container() { return shapes_container; }
 };
 
@@ -130,6 +152,7 @@ private:
 
 private slots:
     void set_shape_type(const QString& shape_type);
+    void change_color();
 
 public:
     ShapeEditor(QWidget* parent = nullptr);
