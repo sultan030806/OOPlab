@@ -51,7 +51,23 @@ private slots:
     void onSpinCChanged(int value);
 
 private:
+    private:
     void setupUI();
+    void setupConnections();
+    void updateInterface(int a, int b, int c);
+    
+    // Новые UI элементы
+    QSlider* m_sliderA;
+    QSlider* m_sliderB;
+    QSlider* m_sliderC;
+    QLabel* m_labelA;
+    QLabel* m_labelB;
+    QLabel* m_labelC;
+    
+    // Новые обработчики
+    void onSliderAChanged(int value);
+    void onSliderBChanged(int value);
+    void onSliderCChanged(int value);
     
     TripleValueModel* m_model;
     QSpinBox* m_spinBoxA;
